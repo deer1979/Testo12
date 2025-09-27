@@ -1,0 +1,27 @@
+name: Android CI
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: gradle/gradle-build-action@v3
+
+      # Estos pasos se saltan si aún no subiste el código con gradlew
+      - name: Build
+        if: ${{ hashFiles('gradlew') != '' }}
+        run: ./gradlew :app:assembleDebug
+
+      - name: Ktlint
+        if: ${{ hashFiles('gradlew') != '' }}
+        run: ./gradlew ktlintCheck
+
+      - name: Detekt
+        if: ${{ hashFiles('gradlew') != '' }}
+        run: ./gradlew detekt
